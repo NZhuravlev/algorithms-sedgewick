@@ -47,12 +47,15 @@ public class WeightedQuickUnion implements UnionFind {
 	public int root(int p) {
 		validate(p);
 		while (p != connections[p])
+		{
+			connections[p] = connections[connections[p]];
 			p = connections[p];
+		}
 		return p;
 	}
 
 	@Override
-	public int find(int i)
+	public int canonical(int i)
 	{
 		validate(i);
 		return max[root(i)];
@@ -87,18 +90,16 @@ public class WeightedQuickUnion implements UnionFind {
 		int rootP = root(p);
 		int rootQ = root(q);
 		if (rootP == rootQ) return;
-		int maxP = max[rootP];
-		int maxQ = max[rootQ];
 		// make smaller root point to larger one
 		if (size[rootP] < size[rootQ]) {
 			connections[rootP] = rootQ;
 			size[rootQ] += size[rootP];
-			max[rootQ] = Math.max(maxP, maxQ);
+			max[rootQ] = Math.max(max[rootP], max[rootQ]);
 		}
 		else {
 			connections[rootQ] = rootP;
 			size[rootP] += size[rootQ];
-			max[rootP] = Math.max(maxP, maxQ);
+			max[rootP] = Math.max(max[rootP], max[rootQ]);
 		}
 		count--;
 	}
