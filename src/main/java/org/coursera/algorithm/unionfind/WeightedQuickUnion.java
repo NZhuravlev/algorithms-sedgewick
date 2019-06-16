@@ -3,10 +3,11 @@ package org.coursera.algorithm.unionfind;
 public class WeightedQuickUnion implements UnionFind {
 	private int[] connections;   // connections[i] = connections of i
 	private int[] size;     // size[i] = number of sites in subtree rooted at i
+	private int[] max;
 	private int count;      // number of components
 
 	/**
-	 * Initializes an empty union–find data structure with {@code n} sites
+	 * Initializes an empty union–root data structure with {@code n} sites
 	 * {@code 0} through {@code n-1}. Each site is initially in its own
 	 * component.
 	 *
@@ -17,8 +18,10 @@ public class WeightedQuickUnion implements UnionFind {
 		count = n;
 		connections = new int[n];
 		size = new int[n];
+		max = new int[n];
 		for (int i = 0; i < n; i++) {
 			connections[i] = i;
+			max[i] = i;
 			size[i] = 1;
 		}
 	}
@@ -41,11 +44,18 @@ public class WeightedQuickUnion implements UnionFind {
 	 * @throws IllegalArgumentException unless {@code 0 <= p < n}
 	 */
 	@Override
-	public int find(int p) {
+	public int root(int p) {
 		validate(p);
 		while (p != connections[p])
 			p = connections[p];
 		return p;
+	}
+
+	@Override
+	public int find(int i)
+	{
+		validate(i);
+		return max[root(i)];
 	}
 
 	/**
@@ -60,7 +70,7 @@ public class WeightedQuickUnion implements UnionFind {
 	 */
 	@Override
 	public boolean connected(int p, int q) {
-		return find(p) == find(q);
+		return root(p) == root(q);
 	}
 
 	/**
@@ -74,18 +84,21 @@ public class WeightedQuickUnion implements UnionFind {
 	 */
 	@Override
 	public void union(int p, int q) {
-		int rootP = find(p);
-		int rootQ = find(q);
+		int rootP = root(p);
+		int rootQ = root(q);
 		if (rootP == rootQ) return;
-
+		int maxP = max[rootP];
+		int maxQ = max[rootQ];
 		// make smaller root point to larger one
 		if (size[rootP] < size[rootQ]) {
 			connections[rootP] = rootQ;
 			size[rootQ] += size[rootP];
+			max[rootQ] = Math.max(maxP, maxQ);
 		}
 		else {
 			connections[rootQ] = rootP;
 			size[rootP] += size[rootQ];
+			max[rootP] = Math.max(maxP, maxQ);
 		}
 		count--;
 	}
